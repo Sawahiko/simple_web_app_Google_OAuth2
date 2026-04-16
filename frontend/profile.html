@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | OAuth2 App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #f0f2ff;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      background: white;
+      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 12px rgba(0,0,0,0.08);
+    }
+    nav .brand { font-size: 18px; font-weight: 700; color: #667eea; }
+    nav .nav-right { display: flex; align-items: center; gap: 12px; }
+    nav img {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid #667eea;
+    }
+    nav .nav-name { font-size: 14px; font-weight: 500; color: #333; }
+    .btn-logout {
+      padding: 7px 16px;
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: #e53e3e; }
+
+    /* ── Main ── */
+    main { max-width: 920px; margin: 36px auto; padding: 0 20px; }
+    .page-title { font-size: 26px; color: #1a1a2e; font-weight: 700; margin-bottom: 6px; }
+    .page-sub { color: #888; font-size: 14px; margin-bottom: 28px; }
+
+    /* ── Grid ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 16px;
+    }
+    .full { grid-column: span 2; }
+
+    /* ── Profile Card ── */
+    .profile-wrap { display: flex; align-items: center; gap: 20px; }
+    .profile-wrap img {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 3px solid #667eea;
+    }
+    .pname { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+    .pemail { color: #667eea; font-size: 14px; margin-top: 4px; }
+
+    /* ── Info Rows ── */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f3f3f3;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .lbl { color: #999; font-weight: 500; }
+
+    /* ── Badges ── */
+    .badge {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .green { background: #e6fffa; color: #239878; }
+    .blue  { background: #ebf0ff; color: #4c6ef5; }
+    .gray  { background: #f0f0f0; color: #666; }
+    .red   { background: #fff0f0; color: #e53e3e; }
+
+    /* ── API Test ── */
+    .btn-api {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 14px;
+      transition: opacity 0.2s;
+    }
+    .btn-api:hover { opacity: 0.85; }
+
+    .api-result {
+      background: #1a1a2e;
+      color: #7ef2a0;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 80px;
+      line-height: 1.7;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 620px) {
+      .grid { grid-template-columns: 1fr; }
+      .full { grid-column: span 1; }
+      .profile-wrap { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <div class="brand">🔐 OAuth2 App</div>
+  <div class="nav-right">
+    <img id="navAvatar" src="" alt="avatar"/>
+    <span class="nav-name" id="navName">Loading...</span>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- Main -->
+<main>
+  <h1 class="page-title" id="greeting">Loading...</h1>
+  <p class="page-sub">You are authenticated via Google OAuth 2.0</p>
+
+  <div class="grid">
+
+    <!-- Profile (full width) -->
+    <div class="card full">
+      <div class="profile-wrap">
+        <img id="avatar" src="" alt="Profile"/>
+        <div>
+          <div class="pname" id="displayName">—</div>
+          <div class="pemail" id="emailEl">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Details -->
+    <div class="card">
+      <div class="card-title">👤 User Details</div>
+      <div class="info-row"><span class="lbl">Given Name</span>  <span id="givenName">—</span></div>
+      <div class="info-row"><span class="lbl">Family Name</span> <span id="familyName">—</span></div>
+      <div class="info-row"><span class="lbl">Locale</span>      <span id="locale">—</span></div>
+      <div class="info-row"><span class="lbl">User ID (sub)</span><span id="sub">—</span></div>
+    </div>
+
+    <!-- Security Info -->
+    <div class="card">
+      <div class="card-title">🔒 Security</div>
+      <div class="info-row">
+        <span class="lbl">Email Verified</span>
+        <span id="verified">—</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Provider</span>
+        <span><span class="badge green">Google</span></span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Session</span>
+        <span><span class="badge green">Active</span></span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Auth Method</span>
+        <span><span class="badge blue">OAuth 2.0</span></span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Flow Type</span>
+        <span><span class="badge gray">Auth Code</span></span>
+      </div>
+    </div>
+
+    <!-- Protected API Test (full width) -->
+    <div class="card full">
+      <div class="card-title">🚀 Protected API Test</div>
+      <button class="btn-api" onclick="callAPI()">▶ Call GET /api/dashboard</button>
+      <div class="api-result" id="apiResult">// Click the button to test the protected backend API...</div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  var API = 'http://localhost:3001';
+
+  // Load user info on page load
+  window.onload = function() {
+    fetch(API + '/auth/me', { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.authenticated) {
+          window.location.href = '/index.html';
+          return;
+        }
+
+        var u = data.user;
+
+        // Navbar
+        document.getElementById('navAvatar').src        = u.picture    || '';
+        document.getElementById('navName').textContent  = u.name       || u.email;
+
+        // Profile card
+        document.getElementById('avatar').src            = u.picture    || '';
+        document.getElementById('greeting').textContent  = 'Hello, ' + (u.given_name || u.name) + '! 👋';
+        document.getElementById('displayName').textContent = u.name       || 'N/A';
+        document.getElementById('emailEl').textContent     = u.email      || 'N/A';
+
+        // User details
+        document.getElementById('givenName').textContent  = u.given_name  || 'N/A';
+        document.getElementById('familyName').textContent = u.family_name || 'N/A';
+        document.getElementById('locale').textContent     = u.locale      || 'N/A';
+        document.getElementById('sub').textContent        = u.sub
+          ? u.sub.substring(0, 10) + '...'
+          : 'N/A';
+
+        // Email verified badge
+        var verifiedEl = document.getElementById('verified');
+        verifiedEl.innerHTML = u.email_verified
+          ? '<span class="badge green">✅ Verified</span>'
+          : '<span class="badge red">❌ Not Verified</span>';
+      })
+      .catch(function() {
+        window.location.href = '/index.html';
+      });
+  };
+
+  // Call protected API
+  function callAPI() {
+    var el = document.getElementById('apiResult');
+    el.textContent = '// Calling /api/dashboard...';
+
+    fetch(API + '/api/dashboard', { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        el.textContent = JSON.stringify(data, null, 2);
+      })
+      .catch(function(err) {
+        el.textContent = '// Error: ' + err.message;
+      });
+  }
+
+  // Logout
+  function logout() {
+    fetch(API + '/auth/logout', { method: 'POST', credentials: 'include' })
+      .then(function() {
+        window.location.href = '/index.html';
+      });
+  }
+</script>
+
+</body>
+</html>
