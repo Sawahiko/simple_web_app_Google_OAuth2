@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const axios   = require('axios');
 const cors    = require('cors');
+const path    = require('path');   // 👈 ADD THIS
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -12,7 +13,7 @@ const {
   GOOGLE_CLIENT_SECRET,
   SESSION_SECRET = 'change-me',
   REDIRECT_URI   = 'http://localhost:3001/auth/google/callback',
-  FRONTEND_URL   = 'http://localhost:3000',
+  FRONTEND_URL   = 'http://localhost:3001',   // 👈 SAME PORT NOW
 } = process.env;
 
 // ── Middleware ─────────────────────────────────────────────────
@@ -22,8 +23,11 @@ app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, secure: false, maxAge: 86400000 },
+  cookie: { httpOnly: true, secure: false, maxAge: 86400000, sameSite: 'lax',},
 }));
+
+// 👇 ADD THIS — Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ── Auth Guard ─────────────────────────────────────────────────
 const requireAuth = (req, res, next) => {
